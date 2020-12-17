@@ -1,0 +1,9 @@
+[RedditCredentials]
+username =  
+password =  
+client_id =  
+client_secret =  
+user_agent = TopCommentEnforcer v0.1.0 by /u/pawptart
+
+[Settings]
+subreddit = testingground4bots

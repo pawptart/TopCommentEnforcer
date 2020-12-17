@@ -1,0 +1,5 @@
+# Sensitive credentials live here
+config.ini
+
+# Don't commit debug logs
+debug.log
