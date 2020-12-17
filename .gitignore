@@ -1,5 +1,8 @@
 # Sensitive credentials live here
 config.ini
 
+# Don't commit user messages
+removal_message.txt
+
 # Don't commit debug logs
 debug.log

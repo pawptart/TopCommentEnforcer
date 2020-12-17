@@ -7,10 +7,17 @@ from submission_handler import SubmissionHandler
 from comment_handler import CommentHandler
 
 __CONFIG_PATH = 'config.ini'
+__MSG_PATH    = 'removal_message.txt'
 __CREDENTIALS = 'RedditCredentials'
 __SETTINGS    = 'Settings'
 __LOGPATH     = 'debug.log'
 __LOG_LEVEL   = logging.INFO
+
+# Sets the version for the user agent:
+with open('VERSION', 'r') as version:
+    __VERSION = version.read()
+
+__THREADS = ['t-1.1', 't-2.1']
 
 config   = None # __load_config() wraps configparser errors
 reddit   = None # __login() sets this to a praw.Reddit instance
@@ -20,6 +27,7 @@ logger   = None # __initialize_logger sets up logfile and stdout logging
 # These will be instantiated on their own thread
 submission_handler  = None
 comment_handler = None
+
 
 def __setup():
     '''
@@ -54,6 +62,8 @@ def __initialize_logger():
     logger.addHandler(stdout_handler)
     logger.addHandler(file_handler)
 
+    logger.info('TopCommentEnforcer v{} by pawptart! Beginning startup...'.format(__VERSION))
+
 
 def __load_config():
     '''
@@ -65,6 +75,8 @@ def __load_config():
     try:
         config = configparser.ConfigParser()
         config.read(__CONFIG_PATH)
+
+        logger.info('Config loaded successfully...')
     except configparser.MissingSectionHeaderError as exception:
         logger.error("config.ini is invalid. Please check that Reddit credentials are present before continuing. Error details: {}".format(exception))
         sys.exit(1)
@@ -87,10 +99,12 @@ def __login():
         reddit = praw.Reddit(
             username      = credentials['username'],
             password      = credentials['password'],
-            client_id     = credentials['client_id'],
-            client_secret = credentials['client_secret'],
-            user_agent    = credentials['user_agent']
+            client_id     = credentials['clientId'],
+            client_secret = credentials['clientSecret'],
+            user_agent    = 'TopCommentEnforcer v{} by /u/pawptart'.format(__VERSION)
         )
+
+        logger.info("Logged into Reddit through PRAW as /u/{}...".format(reddit.user.me()))
     except (configparser.NoSectionError, KeyError) as exception:
         logger.error("config.ini is invalid. Please check that Reddit credentials are present before continuing. Error parsing: {}".format(exception))
         sys.exit(1)
@@ -108,6 +122,13 @@ def __load_settings():
 
     try:
         settings = config[__SETTINGS]
+
+        with open(__MSG_PATH, 'r') as f:
+            message_text = f.read()
+            logger.info("Message text set to: {}".format(message_text))
+            settings.update({ 'removalMessage': message_text })
+
+        logger.info('Loaded settings...')
     except (configparser.NoSectionError, KeyError) as exception:
         logger.error("config.ini is invalid. Please check that settings are present before continuing. Error parsing: {}".format(exception))
         sys.exit(1)
@@ -119,16 +140,21 @@ def __initialize_threads():
 
     global submission_handler, comment_handler
 
-    submission_handler = SubmissionHandler(1, 't-1.1', 1, reddit, settings, logger)
-    comment_handler = CommentHandler(2, 't-2.1', 2, reddit, settings, logger)
+    submission_handler = SubmissionHandler(1, __THREADS[0], 1, reddit, settings, logger)
+    logger.info("SubmissionHandler instantiated on thread [{}]...".format(__THREADS[0]))
+
+    comment_handler = CommentHandler(2, __THREADS[1], 2, reddit, settings, logger)
+    logger.info("SubmissionHandler instantiated on thread [{}]...".format(__THREADS[1]))
 
 def __run():
     '''
     Calls the submission and comment handlers on their own threads with Reddit and configured settings
     '''
 
+    logger.info('Starting up threads...')
     submission_handler.start()
     comment_handler.start()
+    logger.info('Running!')
 
 
 def __main():

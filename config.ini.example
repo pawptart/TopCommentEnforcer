@@ -1,9 +1,13 @@
 [RedditCredentials]
-username =  
-password =  
-client_id =  
-client_secret =  
-user_agent = TopCommentEnforcer v0.1.0 by /u/pawptart
+username =
+password =
+clientId =
+clientSecret =
 
 [Settings]
-subreddit = testingground4bots
+# NOTE: To use the bot on multiple subreddits, use multireddit syntax:
+#
+# SUBREDDIT1+SUBREDDIT2+SUBREDDIT3
+#
+# Your bot must be a mod of all subreddits in the list!
+subreddit =
