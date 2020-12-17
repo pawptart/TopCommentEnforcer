@@ -1,4 +1,6 @@
 [RedditCredentials]
+# For details on acquiring the following, please see the link below under the OAuth header:
+# https://www.reddit.com/r/RequestABot/comments/cyll80/a_comprehensive_guide_to_running_your_reddit_bot/
 username =
 password =
 clientId =
@@ -11,3 +13,12 @@ clientSecret =
 #
 # Your bot must be a mod of all subreddits in the list!
 subreddit =
+minimumApprovalLength = 100
+
+# NOTE: It's best to use either regex or keywords, but not both together.
+# 
+# Below matches all YouTube links
+regexBlacklist = http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?
+# Keywords should be separated by a comma (,)
+# keywordBlackList = youtube,vimeo
+keywordBlackList = 

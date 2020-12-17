@@ -1,3 +1,4 @@
+import re
 import threading
 
 from error_handler import ErrorHandler
@@ -41,12 +42,29 @@ class SubmissionHandler(threading.Thread):
 
     def __should_remove_submission(self, submission):
         is_link  = not submission.is_self
-        is_video = 'youtube' in submission.url
+        is_blacklisted = self.__is_blacklisted(submission.url)
 
-        return is_link and is_video
+        return is_link and is_blacklisted
 
     
     def __handle_removal(self, submission):
         comment = submission.reply(self.settings['removalMessage'])
         comment.mod.distinguish(how='yes', sticky=True)
         submission.mod.remove()
+
+    
+    def __is_blacklisted(self, url):
+        regexes  = self.settings['regexBlacklist']
+        keywords = (self.settings['keywordBlacklist'] or '').split(',')
+
+        for keyword in keywords:
+            if keyword in url:
+                return True 
+
+        for regex in regexes:
+            r = re.compile(regex)
+
+            if re.match(r, url):
+                return True 
+
+        return False

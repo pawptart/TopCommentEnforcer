@@ -47,7 +47,8 @@ class CommentHandler(threading.Thread):
         if not comment.author == submission.author:
             return False
 
-        if len(comment.body) < 100:
+        minimum_reply_length = int(self.settings['minimumApprovalLength']) or -1
+        if len(comment.body) < minimum_reply_length:
             return False
 
         return True
